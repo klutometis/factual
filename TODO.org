@@ -1,4 +1,31 @@
-* TODO REST-calls, translate JSON.
+* DONE Module
+  CLOSED: [2011-11-16 Wed 14:39]
+  #+BEGIN_SRC scheme :tangle test-module.scm :shebang #!/usr/bin/env chicken-scheme
+    (use
+     debug
+     srfi-13
+     factual)
+    
+    (include "my-factual-key.scm")
+    
+    (with-factual-key
+     my-factual-key
+     (lambda ()
+       (for-each
+        (lambda (datum)
+          (display (string-join (map ->string
+                                     (list (factual-datum-locality datum)
+                                           (factual-datum-region datum)
+                                           (factual-datum-country datum)
+                                           (factual-datum-latitude datum)
+                                           (factual-datum-longitude datum)))
+                                "\t"))
+          (newline))
+        (factual-read))))
+    
+  #+END_SRC
+* DONE REST-calls, translate JSON.
+  CLOSED: [2011-11-16 Wed 14:08]
   #+BEGIN_SRC scheme :tangle rest-calls.scm :shebang #!/usr/bin/env chicken-scheme
     (use
      srfi-1

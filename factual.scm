@@ -57,6 +57,9 @@
    longitude
    status)
 
+ (define-record-printer (factual-datum datum out)
+   (format out "#,(factual-datum ~a)" (factual-datum->alist datum)))
+
  (define (factual-read #!key
                        (table "places")
                        (limit 10)
@@ -80,7 +83,8 @@
                              (alist-partition/key 'response data))
                             ((data metadata)
                              (alist-partition/key 'data response)))
-                (cons (vector-map (lambda (i datum) (alist->factual-datum datum)) data)
+                (cons (map (lambda (datum) (alist->factual-datum datum))
+                           (vector->list data))
                       (append headers metadata))))))))
      (values (car data-metadata) (cdr data-metadata))))
 
@@ -94,9 +98,7 @@
                               (max-offset 500))
    (let* ((total-row-count (factual-total-row-count))
           (offset (random (- (min total-row-count max-offset) limit))))
-     (let-values (((data metadata) (factual-read offset: offset
-                                                 limit: limit)))
-       data)))
+     (factual-read offset: offset limit: limit)))
 
  (define (with-factual-key key thunk)
    (parameterize ((factual-key key)) (thunk))))
