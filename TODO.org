@@ -86,6 +86,9 @@
     (with-factual-key
      my-factual-key
      (lambda ()
-       (debug (factual-random-data max-offset: 50))))
+       (for-each
+        (lambda (datum)
+          (format #t "~a\t~a\t~a" (factual-datum)))
+        (factual-random-data max-offset: 50))))
     
   #+END_SRC

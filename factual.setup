@@ -1,0 +1,4 @@
+(include "setup-helper")
+(setup-shared-extension-module
+ 'factual
+ (extension-version 0.1))
