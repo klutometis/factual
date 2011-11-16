@@ -1,0 +1,5 @@
+This is a trivial wrapper around Factual's [[http://developer.factual.com/display/docs/Factual+Developer+APIs+Version+3][API v3]]; it implements [[http://developer.factual.com/display/docs/Core+API+-+Read][read]]:
+
+#+BEGIN_QUOTE
+=factual-read #!key (table "places") (limit 10) (include-count #f) (offset 0)=
+#+END_QUOTE
