@@ -39,17 +39,22 @@
       longitude
       status)
     
-    (define (factual-read #!key (limit 10) (include-count #t))
+    (define (factual-read #!key
+                          (table "places")
+                          (limit 10)
+                          (include-count #f)
+                          (offset 0))
       (let-values
           (((data-metadata uri response)
             (with-input-from-request
              (parameterize ((form-urlencoded-separator "&"))
                            (update-uri (uri-reference "http://api.v3.factual.com")
-                                       path: '("" "t" "places" "read")
+                                       path: `("" "t" ,table "read")
                                        query: `((limit . ,limit)
                                                 (include_count
                                                  . ,(boolean->string include-count))
-                                                (KEY . ,(factual-key)))))
+                                                (KEY . ,(factual-key))
+                                                (offset . ,offset))))
              #f
              (lambda ()
                (let ((data (read-json)))
@@ -61,9 +66,26 @@
                          (append headers metadata))))))))
         (values (car data-metadata) (cdr data-metadata))))
     
-    (let-values (((data metadata)
-                  (parameterize ((factual-key my-factual-key))
-                                (factual-read))))
-      (debug data metadata))
+    (define (factual-total-row-count)
+      (let-values (((data metadata) (factual-read limit: 1
+                                                  include-count: #t)))
+        (alist-ref 'total_row_count metadata)))
+    
+    (define (factual-random-data #!key
+                                 (limit 10)
+                                 (max-offset 500))
+      (let* ((total-row-count (factual-total-row-count))
+             (offset (random (- (min total-row-count max-offset) limit))))
+        (let-values (((data metadata) (factual-read offset: offset
+                                                    limit: limit)))
+          data)))
+    
+    (define (with-factual-key key thunk)
+      (parameterize ((factual-key key)) (thunk)))
+    
+    (with-factual-key
+     my-factual-key
+     (lambda ()
+       (debug (factual-random-data max-offset: 50))))
     
   #+END_SRC
