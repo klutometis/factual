@@ -1,0 +1,69 @@
+* TODO REST-calls, translate JSON.
+  #+BEGIN_SRC scheme :tangle rest-calls.scm :shebang #!/usr/bin/env chicken-scheme
+    (use
+     srfi-1
+     debug
+     intarweb
+     uri-common
+     http-client
+     medea
+     matchable
+     vector-lib
+     defstruct
+     )
+    
+    (include "my-factual-key.scm")
+    
+    (define (alist-delete/key key-deletandum alist)
+      (delete (match-lambda ((key . value) (equal? key key-deletandum))) alist))
+    
+    (define (alist-partition/key key alist)
+      (values (alist-ref key alist)
+              (alist-delete key alist)))
+    
+    (define factual-key (make-parameter #f))
+    
+    (define (boolean->string boolean)
+      (if boolean "true" "false"))
+    
+    (defstruct factual-datum
+      name
+      address
+      locality
+      region
+      country
+      postcode
+      tel
+      category
+      latitude
+      longitude
+      status)
+    
+    (define (factual-read #!key (limit 10) (include-count #t))
+      (let-values
+          (((data-metadata uri response)
+            (with-input-from-request
+             (parameterize ((form-urlencoded-separator "&"))
+                           (update-uri (uri-reference "http://api.v3.factual.com")
+                                       path: '("" "t" "places" "read")
+                                       query: `((limit . ,limit)
+                                                (include_count
+                                                 . ,(boolean->string include-count))
+                                                (KEY . ,(factual-key)))))
+             #f
+             (lambda ()
+               (let ((data (read-json)))
+                 (let*-values (((response headers)
+                                (alist-partition/key 'response data))
+                               ((data metadata)
+                                (alist-partition/key 'data response)))
+                   (cons (vector-map (lambda (i datum) (alist->factual-datum datum)) data)
+                         (append headers metadata))))))))
+        (values (car data-metadata) (cdr data-metadata))))
+    
+    (let-values (((data metadata)
+                  (parameterize ((factual-key my-factual-key))
+                                (factual-read))))
+      (debug data metadata))
+    
+  #+END_SRC
