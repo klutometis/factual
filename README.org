@@ -1,5 +1,30 @@
-This is a trivial wrapper around Factual's [[http://developer.factual.com/display/docs/Factual+Developer+APIs+Version+3][API v3]]; it implements [[http://developer.factual.com/display/docs/Core+API+-+Read][read]]:
+This is a trivial wrapper around Factual's [[http://developer.factual.com/display/docs/Factual+Developer+APIs+Version+3][API v3]]; it implements [[http://developer.factual.com/display/docs/Core+API+-+Read][read]] as:
 
 #+BEGIN_QUOTE
 =factual-read #!key (table "places") (limit 10) (include-count #f) (offset 0)=
+#+END_QUOTE
+
+For instance:
+
+#+BEGIN_QUOTE
+#+BEGIN_SRC scheme
+(use factual srfi-13)
+
+(include "my-factual-key.scm")
+
+(with-factual-key
+ my-factual-key
+ (lambda ()
+   (for-each
+    (lambda (datum)
+      (display (string-join (map ->string
+                                 (list (factual-datum-locality datum)
+                                       (factual-datum-region datum)
+                                       (factual-datum-country datum)
+                                       (factual-datum-latitude datum)
+                                       (factual-datum-longitude datum)))
+                            "\t"))
+      (newline))
+    (factual-read))))
+#+END_SRC
 #+END_QUOTE
