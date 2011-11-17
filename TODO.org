@@ -1,10 +1,7 @@
 * DONE Module
   CLOSED: [2011-11-16 Wed 14:39]
   #+BEGIN_SRC scheme :tangle test-module.scm :shebang #!/usr/bin/env chicken-scheme
-    (use
-     debug
-     srfi-13
-     factual)
+    (use factual srfi-13)
     
     (include "my-factual-key.scm")
     
